@@ -199,13 +199,17 @@
         }
     }
 
-    /**
-     * @param {CalculateRatingData} data 
-     */
-    scope.analyzeRating = async function (region, version, file) {
+    let lastFile = null;
+    scope.analyzeRating = async function (region, version, file, $data) {
         if (!file) {
             return
         }
+
+        if (lastFile !== file) {
+            $data.charts = [];
+            $data.totalRating = 0;
+        }
+        lastFile = file;
 
         const encryptedContent = await file.text();
         let content = "";
@@ -288,13 +292,11 @@
         
         const best50 = allCharts.slice(0, 50);
         best50.sort((a, b) => b.rating - a.rating || b.achievement - a.achievement || b.level - a.level)
-        
-        const returnData = {};
-        returnData.charts = best50.map((chart, index) => {
+
+        $data.charts = best50.map((chart, index) => {
             chart.ranking = index + 1;
             return chart;
         });
-        returnData.totalRating = returnData.charts.reduce((acc, chart) => acc + chart.rating, 0);
-        return returnData
+        $data.totalRating = $data.charts.reduce((acc, chart) => acc + chart.rating, 0);
     }
 })(globalThis);

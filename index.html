@@ -12,7 +12,7 @@
 <body>
     <h2 class="title">AstroDX Score Analyzer</h1>
 
-    <div x-cloak x-data="{ region: 'intl', version: 'festivalplus', totalRating: 0, charts: [], file: null, wasm_initialized: false }" x-effect="const data = await analyzeRating(region, version, file); data && (charts = data.charts, totalRating = data.totalRating);" x-init="wasm_bindgen().then(e => wasm_initialized = true);">
+    <div x-cloak x-data="{ region: 'intl', version: 'festivalplus', totalRating: 0, charts: [], file: null, wasm_initialized: false }" x-effect="const data = await analyzeRating(region, version, file, $data)" x-init="wasm_bindgen().then(e => wasm_initialized = true);">
         <table id="options" class="no-borders">
             <tbody>
                 <!--<tr>
@@ -65,7 +65,7 @@
                 </div>
                 <div class="rating__description">
                     Due to the difficulty of determining if a song is "new" or "old", the rating is<br>
-                    calculated by summing the top 50 chart ratings.
+                    the sum of the top 50 chart ratings.
                 </div>
             </div>
         
