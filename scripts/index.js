@@ -240,7 +240,7 @@
     const [magicCharts, aliases] = await loadMagic(version);
 
     /**
-     * @type {Omit<Chart, "ranking">[]}
+     * @type {Chart[]}
      */
     const allCharts = content
       .trim()
@@ -264,7 +264,11 @@
         };
 
         if (scorePartial.difficulty === "宴") {
-          return;
+          scorePartial.level = 0;
+          scorePartial.isEstimatedLevel = false;
+          scorePartial.rating = 0;
+          scorePartial.rank = calculateRank(scorePartial.achievement);
+          return scorePartial;
         }
 
         const title = normalizeTitle(
@@ -316,23 +320,23 @@
       })
       .filter((chart) => chart);
 
-    allCharts.sort((a, b) => b.rating - a.rating);
-
-    const best50 = allCharts.slice(0, 50);
-    best50.sort(
+    allCharts.sort(
       (a, b) =>
         b.rating - a.rating ||
-        b.achievement - a.achievement ||
-        b.level - a.level
+        b.level - a.level ||
+        b.achievement - a.achievement
     );
 
-    $data.charts = best50.map((chart, index) => {
-      chart.ranking = index + 1;
-      return chart;
-    });
-    $data.totalRating = $data.charts.reduce(
+    $data.best50 = allCharts.slice(0, 50);
+    $data.totalRating = $data.best50.reduce(
       (acc, chart) => acc + chart.rating,
       0
     );
+
+    $data.charts = allCharts;
+  };
+
+  scope.exportToCsv = function (charts) {
+    console.log(charts);
   };
 })(globalThis);

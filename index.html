@@ -1,30 +1,41 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <title>AstroDX Score Analyzer</title>
 
     <meta property="og:title" content="AstroDX Score Analyzer" />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://beerpiss.github.io/astrodx-analyzer/" />
-    <meta property="og:description" content="Tool for analyzing scores from AstroDX Android version" />
+    <meta
+      property="og:url"
+      content="https://beerpiss.github.io/astrodx-analyzer/"
+    />
+    <meta
+      property="og:description"
+      content="Tool for analyzing scores from AstroDX Android version"
+    />
     <meta property="og:locale" content="en_US" />
 
     <link rel="stylesheet" href="styles/index.css" />
     <script src="scripts/decryptor/reflektone_decrypt.js" defer></script>
     <script src="scripts/index.js" defer></script>
     <script src="scripts/alpine.js" defer></script>
-</head>
+  </head>
 </html>
 <body>
-    <h2 class="title">AstroDX Score Analyzer</h1>
+  <h2 class="title">AstroDX Score Analyzer</h2>
 
-    <div x-cloak x-data="{ region: 'intl', version: 'festivalplus', totalRating: 0, charts: [], file: null, wasm_initialized: false }" x-effect="file && await analyzeRating(region, version, file, $data)" x-init="wasm_bindgen().then(e => wasm_initialized = true);">
-        <table id="options" class="no-borders">
-            <tbody>
-                <!--<tr>
+  <div
+    x-cloak
+    x-data="{ region: 'intl', version: 'festivalplus', totalRating: 0, charts: [], best50: [], file: null, wasm_initialized: false }"
+    x-effect="file && await analyzeRating(region, version, file, $data)"
+    x-init="wasm_bindgen().then(e => wasm_initialized = true);"
+  >
+    <table id="options" class="no-borders">
+      <tbody>
+        <!--<tr>
                     <td>
                         <label for="options__region-select">Region</label>
                     </td>
@@ -35,105 +46,141 @@
                         </select>
                     </td>
                 </tr>-->
-                <tr>
-                    <td>
-                        <label for="options__version">Game version</label>
-                    </td>
-                    <td>
-                        <select id="options__version" x-model="version">
-                            <option value="universeplus">UNiVERSE PLUS</option>
-                            <option value="festival">FESTiVAL</option>
-                            <option value="festivalplus" selected>FESTiVAL PLUS</option>
-                        </select>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-        
-        <div class="analyze-rating__description" x-show="wasm_initialized">
-            <b class="analyze-rating__mf_i_said_android_only_please_read">Android only.</b><br><br>
-            Select a <code>cache</code> (AstroDX 2.0 beta), <code>level-index.nya</code> (AstroDX 2.0 dev), or<br><code>chart-meta.fufu</code> (AstroDX 1.1.1) file to get started.
-        </div>
-        <label class="analyze-rating" for="file">
-            <input class="sr-only" type="file" id="file" x-on:change="file = $event.target.files[0]" />
-            <template x-if="wasm_initialized">
-                <span>Upload a file...</span>
-            </template>
-            <template x-if="!wasm_initialized">
-                <span>Loading...</span>
-            </template>
-        </label>
-        <p id="status"></p>
+        <tr>
+          <td>
+            <label for="options__version">Game version</label>
+          </td>
+          <td>
+            <select id="options__version" x-model="version">
+              <option value="universeplus">UNiVERSE PLUS</option>
+              <option value="festival">FESTiVAL</option>
+              <option value="festivalplus" selected>FESTiVAL PLUS</option>
+            </select>
+          </td>
+        </tr>
+      </tbody>
+    </table>
 
-        <div x-show="charts.length > 0">
-            <hr class="separator" />
-    
-            <h2 class="title">Analysis result</h2>
-            <div class="rating__overview">
-                <div class="rating__total">
-                    Rating: <span x-text="totalRating"></span>
-                </div>
-                <div class="rating__description">
-                    Due to the difficulty of determining if a song is "new" or "old",<br />
-                    the rating is the sum of the top 50 chart ratings.
-                </div>
-            </div>
-        
-            <table id="charts">
-                <thead>
-                    <tr>
-                        <th scope="col">#</th>
-                        <th scope="col">Song</th>
-                        <th scope="col">Difficuty</th>
-                        <th scope="col">Level</th>
-                        <th scope="col">Achv</th>
-                        <th scope="col">Rank</th>
-                        <th scope="col">Rating</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <template x-if="charts.length === 0">
-                        <tr>
-                            <td colspan="7" style="text-align: center;">No data</td>
-                        </tr>
-                    </template>
-                    <template x-for="chart in charts" :key="chart.ranking">
-                        <tr class="chart-row" x-bind:class="'chart-row__' + chart.difficulty.toLowerCase().replace(':', '')">
-                            <td class="chart-row__ranking" x-text="chart.ranking"></td>
-                            <td class="chart-row__title" x-text="chart.title + displayedChartType(chart.chartType)"></td>
-                            <td class="chart-row__difficulty" x-text="chart.difficulty"></td>
-                            <td class="chart-row__level" x-text="(chart.isEstimatedLevel ? '~' : '') + chart.level.toFixed(1)"></td>
-                            <td class="chart-row__achievement" x-text="chart.achievement.toFixed(4) + '%'"></td>
-                            <td class="chart-row__rank" x-text="chart.rank"></td>
-                            <td class="chart-row__rating" x-text="chart.rating"></td>
-                        </tr>
-                    </template>
-                </tbody>
-            </table>
-        </div>
+    <div class="analyze-rating__description" x-show="wasm_initialized">
+      <b class="analyze-rating__mf_i_said_android_only_please_read"
+        >Android only.</b
+      ><br /><br />
+      Select a <code>cache</code> (AstroDX 2.0 beta),
+      <code>level-index.nya</code> (AstroDX 2.0 dev), or<br /><code
+        >chart-meta.fufu</code
+      >
+      (AstroDX 1.1.1) file to get started.
     </div>
+    <div class="analyze-rating__buttons">
+      <label class="analyze-rating__button" for="file">
+        <input
+          class="sr-only"
+          type="file"
+          id="file"
+          x-on:change="file = $event.target.files[0]"
+        />
+        <template x-if="wasm_initialized">
+          <span>Upload a file...</span>
+        </template>
+        <template x-if="!wasm_initialized">
+          <span>Loading...</span>
+        </template>
+      </label>
+      <!-- <template x-if="charts.length > 0">
+                <div class="analyze-rating__button" x-on:click="exportToCsv(charts)">
+                    Export to CSV
+                </div>
+            </template> -->
+    </div>
+    <p id="status"></p>
 
-    <hr class="separator" />
-    <h2 class="title">Frequently Asked Questions</h2>
-    <ul>
-        <li>
-            Q: <span class="faq__question">Will there be iOS support?</span><br />
-            A: <span class="faq__answer">
-                Unfortunately, no. AstroDX on iOS generates a unique <code>cache</code> encryption<br />
-                key every installation.
-            </span>
-        </li>
-        <li>
-            Q: <span class="faq__question">Can I export my scores?</span><br />
-            A: <span class="faq__answer">Soon™.</span>
-        </li>
-    </ul>
-    
+    <div x-show="charts.length > 0">
+      <hr class="separator" />
 
-    <hr class="separator" />
-    <h2 class="title">Credits</h2>
-    <ul>
-        <li><a href="https://github.com/myjian" target="_blank">myjian</a> for the CSS.</li>
-        <li><a href="https://github.com/alpinejs/alpine" target="_blank">AlpineJS</a></li>
-    </ul>
+      <h2 class="title">Analysis result</h2>
+      <div class="rating__overview">
+        <div class="rating__total">
+          Rating: <span x-text="totalRating"></span>
+        </div>
+        <div class="rating__description">
+          Due to the difficulty of determining if a song is "new" or "old", the
+          rating is the sum of the top 50 chart ratings.
+        </div>
+      </div>
+
+      <table id="charts">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Song</th>
+            <th scope="col">Difficuty</th>
+            <th scope="col">Level</th>
+            <th scope="col">Achv</th>
+            <th scope="col">Rank</th>
+            <th scope="col">Rating</th>
+          </tr>
+        </thead>
+        <tbody>
+          <template x-if="charts.length === 0">
+            <tr>
+              <td colspan="7" style="text-align: center">No data</td>
+            </tr>
+          </template>
+          <template x-for="(chart, index) in best50" :key="index">
+            <tr
+              class="chart-row"
+              x-bind:class="'chart-row__' + chart.difficulty.toLowerCase().replace(':', '')"
+            >
+              <td class="chart-row__ranking" x-text="index + 1"></td>
+              <td
+                class="chart-row__title"
+                x-text="chart.title + displayedChartType(chart.chartType)"
+              ></td>
+              <td class="chart-row__difficulty" x-text="chart.difficulty"></td>
+              <td
+                class="chart-row__level"
+                x-text="(chart.isEstimatedLevel ? '~' : '') + chart.level.toFixed(1)"
+              ></td>
+              <td
+                class="chart-row__achievement"
+                x-text="chart.achievement.toFixed(4) + '%'"
+              ></td>
+              <td class="chart-row__rank" x-text="chart.rank"></td>
+              <td class="chart-row__rating" x-text="chart.rating"></td>
+            </tr>
+          </template>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <hr class="separator" />
+  <h2 class="title">Frequently Asked Questions</h2>
+  <ul>
+    <li>
+      Q: <span class="faq__question">Will there be iOS support?</span><br />
+      A:
+      <span class="faq__answer">
+        Unfortunately, no. AstroDX on iOS generates a unique
+        <code>cache</code> encryption<br />
+        key every installation.
+      </span>
+    </li>
+    <li>
+      Q: <span class="faq__question">Can I export my scores?</span><br />
+      A: <span class="faq__answer">Soon™.</span>
+    </li>
+  </ul>
+
+  <hr class="separator" />
+  <h2 class="title">Credits</h2>
+  <ul>
+    <li>
+      <a href="https://github.com/myjian" target="_blank">myjian</a> for the
+      CSS.
+    </li>
+    <li>
+      <a href="https://github.com/alpinejs/alpine" target="_blank">AlpineJS</a>
+    </li>
+  </ul>
 </body>
