@@ -254,6 +254,7 @@
           level: Number(cells[3].replace("+", ".7")),
           isEstimatedLevel: true,
           achievement: Number(cells[5].replace("%", "")),
+          rank: calculateRank(Number(cells[5].replace("%", ""))),
           // Assuming chart type is only provided when differentiation is required.
           chartType:
             cells[4] === "DX"
@@ -262,14 +263,6 @@
               ? ChartType.STANDARD_BOTH
               : ChartType.UNKNOWN,
         };
-
-        if (scorePartial.difficulty === "宴") {
-          scorePartial.level = 0;
-          scorePartial.isEstimatedLevel = false;
-          scorePartial.rating = 0;
-          scorePartial.rank = calculateRank(scorePartial.achievement);
-          return scorePartial;
-        }
 
         const title = normalizeTitle(
           aliases.get(scorePartial.title) || scorePartial.title
@@ -292,27 +285,31 @@
         }
         const chart = charts[0];
 
-        if (chart) {
-          const difficultyIndex = DIFFICULTIES.indexOf(scorePartial.difficulty);
-          if (difficultyIndex < 4) {
-            scorePartial.level = chart.lv[difficultyIndex];
-          } else {
-            scorePartial.level = chart.lv[chart.lv.length - 1];
-          }
-
-          if (scorePartial.level < 0) {
-            scorePartial.level = -scorePartial.level;
-            scorePartial.isEstimatedLevel = true;
-          } else {
-            scorePartial.isEstimatedLevel = false;
-          }
-
-          if (scorePartial.chartType === -1) {
-            scorePartial.chartType = chart.dx;
-          }
+        if (scorePartial.difficulty === "宴" || !chart) {
+          scorePartial.level = 0;
+          scorePartial.isEstimatedLevel = false;
+          scorePartial.rating = 0;
+          return scorePartial;
         }
 
-        scorePartial.rank = calculateRank(scorePartial.achievement);
+        const difficultyIndex = DIFFICULTIES.indexOf(scorePartial.difficulty);
+        if (difficultyIndex < 4) {
+          scorePartial.level = chart.lv[difficultyIndex];
+        } else {
+          scorePartial.level = chart.lv[chart.lv.length - 1];
+        }
+
+        if (scorePartial.level < 0) {
+          scorePartial.level = -scorePartial.level;
+          scorePartial.isEstimatedLevel = true;
+        } else {
+          scorePartial.isEstimatedLevel = false;
+        }
+
+        if (scorePartial.chartType === -1) {
+          scorePartial.chartType = chart.dx;
+        }
+
         scorePartial.rating = calculateRating(
           scorePartial.achievement,
           scorePartial.level
