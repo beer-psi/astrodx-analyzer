@@ -12,7 +12,7 @@
 <body>
     <h2 class="title">AstroDX Score Analyzer</h1>
 
-    <div x-data="{ region: 'intl', version: 'festivalplus', totalRating: 0, charts: [], file: null, wasm_initialized: false }" x-effect="const data = await analyzeRating(region, version, file); charts = data.charts; totalRating = data.totalRating;" x-init="wasm_bindgen().then(e => wasm_initialized = true);">
+    <div x-cloak x-data="{ region: 'intl', version: 'festivalplus', totalRating: 0, charts: [], file: null, wasm_initialized: false }" x-effect="const data = await analyzeRating(region, version, file); data && (charts = data.charts, totalRating = data.totalRating);" x-init="wasm_bindgen().then(e => wasm_initialized = true);">
         <table id="options" class="no-borders">
             <tbody>
                 <!--<tr>
@@ -54,50 +54,60 @@
                 <span>Loading...</span>
             </template>
         </label>
+
+        <div x-show="charts.length > 0">
+            <hr class="separator" />
     
-        <hr class="separator" />
-    
-        <h2 class="title">Analysis result</h2>
-        <div class="rating__overview">
-            <div class="rating__total">
-                Rating: <span x-text="totalRating"></span>
+            <h2 class="title">Analysis result</h2>
+            <div class="rating__overview">
+                <div class="rating__total">
+                    Rating: <span x-text="totalRating"></span>
+                </div>
+                <div class="rating__description">
+                    Due to the difficulty of determining if a song is "new" or "old", the rating is<br>
+                    calculated by summing the top 50 chart ratings.
+                </div>
             </div>
-            <div class="rating__description">
-                Due to the difficulty of determining if a song is "new" or "old", the rating is<br>
-                calculated by summing the top 50 chart ratings.
-            </div>
-        </div>
-    
-        <table id="charts">
-            <thead>
-                <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">Song</th>
-                    <th scope="col">Difficuty</th>
-                    <th scope="col">Level</th>
-                    <th scope="col">Achv</th>
-                    <th scope="col">Rank</th>
-                    <th scope="col">Rating</th>
-                </tr>
-            </thead>
-            <tbody>
-                <template x-if="charts.length === 0">
+        
+            <table id="charts">
+                <thead>
                     <tr>
-                        <td colspan="7" style="text-align: center;">No data</td>
+                        <th scope="col">#</th>
+                        <th scope="col">Song</th>
+                        <th scope="col">Difficuty</th>
+                        <th scope="col">Level</th>
+                        <th scope="col">Achv</th>
+                        <th scope="col">Rank</th>
+                        <th scope="col">Rating</th>
                     </tr>
-                </template>
-                <template x-for="chart in charts" :key="chart.ranking">
-                    <tr class="chart-row" x-bind:class="'chart-row__' + chart.difficulty.toLowerCase().replace(':', '')">
-                        <td class="chart-row__ranking" x-text="chart.ranking"></td>
-                        <td class="chart-row__title" x-text="chart.title + displayedChartType(chart.chartType)"></td>
-                        <td class="chart-row__difficulty" x-text="chart.difficulty"></td>
-                        <td class="chart-row__level" x-text="(chart.isEstimatedLevel ? '~' : '') + chart.level.toFixed(1)"></td>
-                        <td class="chart-row__achievement" x-text="chart.achievement.toFixed(4) + '%'"></td>
-                        <td class="chart-row__rank" x-text="chart.rank"></td>
-                        <td class="chart-row__rating" x-text="chart.rating"></td>
-                    </tr>
-                </template>
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    <template x-if="charts.length === 0">
+                        <tr>
+                            <td colspan="7" style="text-align: center;">No data</td>
+                        </tr>
+                    </template>
+                    <template x-for="chart in charts" :key="chart.ranking">
+                        <tr class="chart-row" x-bind:class="'chart-row__' + chart.difficulty.toLowerCase().replace(':', '')">
+                            <td class="chart-row__ranking" x-text="chart.ranking"></td>
+                            <td class="chart-row__title" x-text="chart.title + displayedChartType(chart.chartType)"></td>
+                            <td class="chart-row__difficulty" x-text="chart.difficulty"></td>
+                            <td class="chart-row__level" x-text="(chart.isEstimatedLevel ? '~' : '') + chart.level.toFixed(1)"></td>
+                            <td class="chart-row__achievement" x-text="chart.achievement.toFixed(4) + '%'"></td>
+                            <td class="chart-row__rank" x-text="chart.rank"></td>
+                            <td class="chart-row__rating" x-text="chart.rating"></td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+        </div>
+
+        <hr class="separator" />
+
+        <h2 class="title">Credits</h2>
+        <ul>
+            <li><a href="https://github.com/myjian" target="_blank">myjian</a> for the CSS.</li>
+            <li><a href="https://github.com/alpinejs/alpine" target="_blank">AlpineJS</a></li>
+        </ul>
     </div>
 </body>
