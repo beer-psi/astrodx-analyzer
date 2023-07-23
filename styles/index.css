@@ -42,6 +42,10 @@ select {
     margin-top: 0.5em;
 }
 
+.analyze-rating__mf_i_said_android_only_please_read {
+    font-size: 1.25rem;
+}
+
 .separator {
     margin-top: 1.75rem;
 }
