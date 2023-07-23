@@ -38,13 +38,27 @@ select {
 }
 
 .analyze-rating__button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
   flex: initial;
+
   margin-top: 1rem;
   margin-right: 0.5rem;
   padding: 0.4rem 1.25rem;
   cursor: pointer;
   border: 0.125rem solid #999;
   /* font-size: 1.25rem; */
+}
+
+.analyze-rating__button-text {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 8rem;
+  height: 2rem;
 }
 
 .analyze-rating__description {

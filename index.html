@@ -30,21 +30,21 @@
   <div
     x-data="{ region: 'intl', version: 'festivalplus', totalRating: 0, charts: [], best50: [], file: null, wasm_initialized: false }"
     x-effect="file && await analyzeRating(region, version, file, $data)"
-    x-init="wasm_bindgen().then(e => wasm_initialized = true);"
+    x-init="wasm_bindgen().then(_ => wasm_initialized = true);"
   >
     <table id="options" class="no-borders">
       <tbody>
         <!--<tr>
-                    <td>
-                        <label for="options__region-select">Region</label>
-                    </td>
-                    <td>
-                        <select id="options__region-select" x-model="region">
-                            <option value="jp">Japan</option>
-                            <option value="intl" selected>International</option>
-                        </select>
-                    </td>
-                </tr>-->
+            <td>
+                <label for="options__region-select">Region</label>
+            </td>
+            <td>
+                <select id="options__region-select" x-model="region">
+                    <option value="jp">Japan</option>
+                    <option value="intl" selected>International</option>
+                </select>
+            </td>
+        </tr>-->
         <tr>
           <td>
             <label for="options__version">Game version</label>
@@ -79,14 +79,15 @@
           x-on:change="file = $event.target.files[0]"
         />
         <span 
+          class="analyze-rating__button-text"
           x-text="wasm_initialized ? 'Upload a file...' : 'Loading...'"
         >Loading...</span>
       </label>
-      <!-- <template x-if="charts.length > 0">
-                <div class="analyze-rating__button" x-on:click="exportToCsv(charts)">
-                    Export to CSV
-                </div>
-            </template> -->
+      <!--<template x-if="charts.length > 0">
+          <div class="analyze-rating__button" x-on:click="exportToCsv(charts)">
+              <span class="analyze-rating__button-text">Export to CSV</span>
+          </div>
+      </template>-->
     </div>
     <p id="status"></p>
 
