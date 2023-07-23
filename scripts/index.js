@@ -284,6 +284,7 @@
         );
         if (charts.length > 1 && scorePartial.chartType === ChartType.UNKNOWN) {
           charts = charts.map((chart) => {
+            // Bumping the chart type to their *_BOTH variants
             chart.dx += 2;
             return chart;
           });

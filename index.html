@@ -28,7 +28,6 @@
   <h2 class="title">AstroDX Score Analyzer</h2>
 
   <div
-    x-cloak
     x-data="{ region: 'intl', version: 'festivalplus', totalRating: 0, charts: [], best50: [], file: null, wasm_initialized: false }"
     x-effect="file && await analyzeRating(region, version, file, $data)"
     x-init="wasm_bindgen().then(e => wasm_initialized = true);"
@@ -61,14 +60,14 @@
       </tbody>
     </table>
 
-    <div class="analyze-rating__description" x-show="wasm_initialized">
-      <b class="analyze-rating__mf_i_said_android_only_please_read"
-        >Android only.</b
-      ><br /><br />
+    <div class="analyze-rating__description">
+      <b class="analyze-rating__mf_i_said_android_only_please_read">
+        Android only.
+      </b>
+      <br /><br />
       Select a <code>cache</code> (AstroDX 2.0 beta),
-      <code>level-index.nya</code> (AstroDX 2.0 dev), or<br /><code
-        >chart-meta.fufu</code
-      >
+      <code>level-index.nya</code> (AstroDX 2.0 dev), or
+      <code>chart-meta.fufu</code>
       (AstroDX 1.1.1) file to get started.
     </div>
     <div class="analyze-rating__buttons">
@@ -79,12 +78,9 @@
           id="file"
           x-on:change="file = $event.target.files[0]"
         />
-        <template x-if="wasm_initialized">
-          <span>Upload a file...</span>
-        </template>
-        <template x-if="!wasm_initialized">
-          <span>Loading...</span>
-        </template>
+        <span 
+          x-text="wasm_initialized ? 'Upload a file...' : 'Loading...'"
+        >Loading...</span>
       </label>
       <!-- <template x-if="charts.length > 0">
                 <div class="analyze-rating__button" x-on:click="exportToCsv(charts)">
@@ -94,7 +90,7 @@
     </div>
     <p id="status"></p>
 
-    <div x-show="charts.length > 0">
+    <div x-cloak x-show="charts.length > 0">
       <hr class="separator" />
 
       <h2 class="title">Analysis result</h2>

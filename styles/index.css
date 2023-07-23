@@ -11,6 +11,8 @@ body {
     sans-serif;
 }
 
+[x-cloak] { display: none !important; }
+
 .no-borders {
   border-collapse: collapse;
 }
