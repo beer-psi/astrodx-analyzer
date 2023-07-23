@@ -213,16 +213,21 @@
 
         const encryptedContent = await file.text();
         let content = "";
-        switch (file.name) {
-            case "chart-meta.fufu":
-                content = wasm_bindgen.export_legacy_meta(encryptedContent);
-                break;
-            case "level-index.nya":
-                content = wasm_bindgen.export_dev_meta(encryptedContent);
-                break;
-            default:
-                content = wasm_bindgen.export_current_meta(encryptedContent);
-                break;
+
+        try {
+            switch (file.name) {
+                case "chart-meta.fufu":
+                    content = wasm_bindgen.export_legacy_meta(encryptedContent);
+                    break;
+                case "level-index.nya":
+                    content = wasm_bindgen.export_dev_meta(encryptedContent);
+                    break;
+                default:
+                    content = wasm_bindgen.export_current_meta(encryptedContent);
+                    break;
+            }
+        } catch (e) {
+            document.getElementById("status").innerText = "Failed to decrypt file. Are you on iOS?";
         }
 
         const [magicCharts, aliases] = await loadMagic(version);
