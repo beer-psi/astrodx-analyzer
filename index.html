@@ -28,7 +28,7 @@
   <h2 class="title">AstroDX Score Analyzer</h2>
 
   <div
-    x-data="{ region: 'intl', version: 'festivalplus', totalRating: 0, charts: [], best50: [], file: null, wasm_initialized: false }"
+    x-data="{ region: 'intl', version: 'festivalplus', totalRating: 0, best50: [], tsvRows: [], file: null, wasm_initialized: false, status: '' }"
     x-effect="file && await analyzeRating(region, version, file, $data)"
     x-init="wasm_bindgen().then(_ => wasm_initialized = true);"
   >
@@ -83,15 +83,15 @@
           x-text="wasm_initialized ? 'Upload a file...' : 'Loading...'"
         >Loading...</span>
       </label>
-      <!--<template x-if="charts.length > 0">
-          <div class="analyze-rating__button" x-on:click="exportToCsv(charts)">
-              <span class="analyze-rating__button-text">Export to CSV</span>
+      <template x-if="tsvRows.length > 0">
+          <div class="analyze-rating__button" x-on:click="exportToTsv(tsvRows)">
+              <span class="analyze-rating__button-text">Export to TSV</span>
           </div>
-      </template>-->
+      </template>
     </div>
-    <p id="status"></p>
+    <p x-text="status"></p>
 
-    <div x-cloak x-show="charts.length > 0">
+    <div x-cloak x-show="best50.length > 0">
       <hr class="separator" />
 
       <h2 class="title">Analysis result</h2>

@@ -222,7 +222,7 @@
    */
   scope.analyzeRating = async function (region, version, file, $data) {
     if (lastFile !== file) {
-      $data.charts = [];
+      $data.best50 = [];
       $data.totalRating = 0;
     }
     lastFile = file;
@@ -243,12 +243,16 @@
           break;
       }
     } catch (e) {
-      document.getElementById("status").innerText =
-        "Failed to decrypt file. Are you on iOS?";
+      $data.status = "Failed to decrypt file. Are you on iOS?";
+      return;
     }
 
+    $data.status = "Loading internal level data...";
     const [magicCharts, aliases] = await loadMagic(version);
 
+    $data.status = "Processing scores...";
+    // For CSV export
+    const annotatedRows = [];
     /**
      * @type {Chart[]}
      */
@@ -259,12 +263,12 @@
         const cells = line.split("\t");
         
         const score = {
-          title: cells[0],
-          difficulty: cells[2],
-          level: Number(cells[3].replace("+", ".7")),
+          title: cells[1],
+          difficulty: cells[5],
+          level: Number(cells[6].replace("+", ".7")),
           isEstimatedLevel: true,
-          achievement: Number(cells[5].replace("%", "")),
-          rank: calculateRank(Number(cells[5].replace("%", ""))),
+          achievement: Number(cells[17].replace("%", "")),
+          rank: calculateRank(Number(cells[17].replace("%", ""))),
           // Assuming chart type is only provided when differentiation is required.
           chartType:
             cells[4] === "DX"
@@ -273,6 +277,7 @@
               ? ChartType.STANDARD_BOTH
               : ChartType.UNKNOWN,
         };
+        cells.push(score.rank);
 
         const title = normalizeTitle(
           aliases.get(score.title) || score.title
@@ -295,10 +300,15 @@
         }
         const chart = charts[0];
 
+        // Exit early if chart is UTAGE or unknown
         if (score.difficulty === "宴" || !chart) {
           score.level = 0;
           score.isEstimatedLevel = false;
           score.rating = 0;
+
+          cells.push(score.rating);
+          annotatedRows.push(cells);
+
           return score;
         }
 
@@ -316,35 +326,50 @@
           score.isEstimatedLevel = false;
         }
 
-        if (score.chartType === -1) {
+        if (score.chartType === ChartType.UNKNOWN) {
           score.chartType = chart.dx;
+        }
+        if (score.chartType === ChartType.STANDARD_BOTH || score.chartType === ChartType.STANDARD_ONLY) {
+          cells[4] = "STANDARD";
+        } else if (score.chartType === ChartType.DX_BOTH || score.chartType === ChartType.DX_ONLY) {
+          cells[4] = "DX";
         }
 
         score.rating = calculateRating(
           score.achievement,
           score.level
         );
+        cells.push(score.rating);
+        annotatedRows.push(cells);
         return score;
-      })
-      .filter((chart) => chart);
+      });
 
+    $data.status = "Sorting scores...";
     allCharts.sort(
       (a, b) =>
         b.rating - a.rating ||
         b.level - a.level ||
         b.achievement - a.achievement
     );
-
+    
+    $data.tsvRows = annotatedRows;
     $data.best50 = allCharts.slice(0, 50);
     $data.totalRating = $data.best50.reduce(
       (acc, chart) => acc + chart.rating,
       0
     );
-
-    $data.charts = allCharts;
+    $data.status = "";
   };
 
-  scope.exportToCsv = function (charts) {
-    console.log(charts);
+  scope.exportToTsv = function (rows) {
+    const header = ["category", "title", "artist", "charter", "type", "difficulty", "level", "clear", "maxcombo", "tries", "cleared_plays", "complete_plays", "total_notes", "critical", "perfect", "great", "good", "achievement", "rank", "rating"];
+    const tsvRows = rows.map((row) => row.join("\t"));
+    const tsv = [header.join("\t"), ...tsvRows].join("\n");
+
+    const blob = new Blob([tsv], { type: "text/tab-separated-values" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "scores.tsv";
+    a.click();
   };
 })(globalThis);
