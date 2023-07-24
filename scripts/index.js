@@ -129,7 +129,7 @@
    * @returns {Promise<[SgimeraChart[], Map<string, string>]>}
    */
   async function loadMagic(version) {
-    const cachedMagicString = localStorage.getItem(`maidx-in-lv-${version}`);
+    const cachedMagicString = localStorage.getItem(`inlv${version}`);
     const cachedMagic = JSON.parse(cachedMagicString ?? "{}");
     if (cachedMagicString && new Date(cachedMagic.expiration) > new Date()) {
       const data = cachedMagic.data;
@@ -140,10 +140,10 @@
     const magic = await fetchMagic(version);
     if (magic[0].length) {
       window.localStorage.setItem(
-        `maidx-in-lv-${version}`,
+        `inlv${version}`,
         JSON.stringify(
           {
-            expiration: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
+            expiration: new Date(Date.now() + 1000 * 60 * 60 * 24),
             data: magic,
           },
           (_, value) =>
@@ -209,7 +209,17 @@
     }
   };
 
+  /**
+   * @type {File | null}
+   */
   let lastFile = null;
+  /**
+   * 
+   * @param {"jp" | "intl"} region 
+   * @param {keyof typeof magicSauce} version 
+   * @param {File} file 
+   * @param {Record<string, Any>} $data 
+   */
   scope.analyzeRating = async function (region, version, file, $data) {
     if (lastFile !== file) {
       $data.charts = [];
@@ -247,8 +257,8 @@
       .split("\n")
       .map((line) => {
         const cells = line.split("\t");
-
-        const scorePartial = {
+        
+        const score = {
           title: cells[0],
           difficulty: cells[2],
           level: Number(cells[3].replace("+", ".7")),
@@ -265,17 +275,17 @@
         };
 
         const title = normalizeTitle(
-          aliases.get(scorePartial.title) || scorePartial.title
+          aliases.get(score.title) || score.title
         );
 
         let charts = magicCharts.filter(
           (chart) =>
             (normalizeTitle(chart.n) === title ||
               (chart.nn && normalizeTitle(chart.nn) === title)) &&
-            (scorePartial.chartType === ChartType.UNKNOWN ||
-              scorePartial.chartType === chart.dx)
+            (score.chartType === ChartType.UNKNOWN ||
+              score.chartType === chart.dx)
         );
-        if (charts.length > 1 && scorePartial.chartType === ChartType.UNKNOWN) {
+        if (charts.length > 1 && score.chartType === ChartType.UNKNOWN) {
           charts = charts.map((chart) => {
             // Bumping the chart type to their *_BOTH variants
             chart.dx += 2;
@@ -285,36 +295,36 @@
         }
         const chart = charts[0];
 
-        if (scorePartial.difficulty === "宴" || !chart) {
-          scorePartial.level = 0;
-          scorePartial.isEstimatedLevel = false;
-          scorePartial.rating = 0;
-          return scorePartial;
+        if (score.difficulty === "宴" || !chart) {
+          score.level = 0;
+          score.isEstimatedLevel = false;
+          score.rating = 0;
+          return score;
         }
 
-        const difficultyIndex = DIFFICULTIES.indexOf(scorePartial.difficulty);
-        if (difficultyIndex < 4) {
-          scorePartial.level = chart.lv[difficultyIndex];
+        const difficultyIndex = DIFFICULTIES.indexOf(score.difficulty);
+        if (difficultyIndex < 4) { // 4 is Re:MASTER
+          score.level = chart.lv[difficultyIndex];
         } else {
-          scorePartial.level = chart.lv[chart.lv.length - 1];
+          score.level = chart.lv[chart.lv.length - 1];
         }
 
-        if (scorePartial.level < 0) {
-          scorePartial.level = -scorePartial.level;
-          scorePartial.isEstimatedLevel = true;
+        if (score.level < 0) {
+          score.level = -score.level;
+          score.isEstimatedLevel = true;
         } else {
-          scorePartial.isEstimatedLevel = false;
+          score.isEstimatedLevel = false;
         }
 
-        if (scorePartial.chartType === -1) {
-          scorePartial.chartType = chart.dx;
+        if (score.chartType === -1) {
+          score.chartType = chart.dx;
         }
 
-        scorePartial.rating = calculateRating(
-          scorePartial.achievement,
-          scorePartial.level
+        score.rating = calculateRating(
+          score.achievement,
+          score.level
         );
-        return scorePartial;
+        return score;
       })
       .filter((chart) => chart);
 

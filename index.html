@@ -118,15 +118,9 @@
           </tr>
         </thead>
         <tbody>
-          <template x-if="charts.length === 0">
-            <tr>
-              <td colspan="7" style="text-align: center">No data</td>
-            </tr>
-          </template>
           <template x-for="(chart, index) in best50" :key="index">
             <tr
-              class="chart-row"
-              x-bind:class="'chart-row__' + chart.difficulty.toLowerCase().replace(':', '')"
+              :class="'chart-row chart-row__' + chart.difficulty.toLowerCase().replace(':', '')"
             >
               <td class="chart-row__ranking" x-text="index + 1"></td>
               <td

@@ -144,6 +144,10 @@ select {
   text-align: center;
 }
 
+.chart-row__easy {
+  color: rgb(0, 135, 255);
+}
+
 .chart-row__basic {
   color: #49b63e;
 }
@@ -162,4 +166,8 @@ select {
 
 .chart-row__remaster {
   color: #bd6bd5;
+}
+
+.chart-row__宴 {
+  color: rgb(79, 0, 81.6);
 }
