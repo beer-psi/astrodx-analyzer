@@ -224,6 +224,7 @@
     if (lastFile !== file) {
       $data.best50 = [];
       $data.totalRating = 0;
+      $data.status = "";
     }
     lastFile = file;
 
@@ -244,6 +245,11 @@
       }
     } catch (e) {
       $data.status = "Failed to decrypt file. Are you on iOS?";
+      return;
+    }
+
+    if (content.length === 0) {
+      $data.status = "No charts found.";
       return;
     }
 
