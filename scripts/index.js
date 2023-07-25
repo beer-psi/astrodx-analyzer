@@ -285,6 +285,18 @@
         };
         cells.push(score.rank);
 
+        // Exit early if chart is UTAGE
+        if (score.difficulty === "宴") {
+          score.level = 0;
+          score.isEstimatedLevel = false;
+          score.rating = 0;
+
+          cells.push(score.rating);
+          annotatedRows.push(cells);
+
+          return score;
+        }
+
         const title = normalizeTitle(
           aliases.get(score.title) || score.title
         );
@@ -306,11 +318,9 @@
         }
         const chart = charts[0];
 
-        // Exit early if chart is UTAGE or unknown
-        if (score.difficulty === "宴" || !chart) {
-          score.level = 0;
-          score.isEstimatedLevel = false;
-          score.rating = 0;
+        // Exit early if chart is unknown
+        if (!chart) {
+          score.rating = calculateRating(score.achievement, score.level);
 
           cells.push(score.rating);
           annotatedRows.push(cells);
