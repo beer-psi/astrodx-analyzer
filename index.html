@@ -61,22 +61,20 @@
     </table>
 
     <div class="analyze-rating__description">
-      <b class="analyze-rating__mf_i_said_android_only_please_read">
-        Android only.
-      </b>
-      <br /><br />
+      <h3 class="analyze-rating__mf_i_said_android_only_please_read">Android only.</h3>
       Select a <code>cache</code> (AstroDX 2.0 beta),
       <code>level-index.nya</code> (AstroDX 2.0 dev), or
       <code>chart-meta.fufu</code>
       (AstroDX 1.1.1) file to get started.
     </div>
     <div class="analyze-rating__buttons">
-      <label class="analyze-rating__button" for="file">
+      <label class="analyze-rating__button" for="cache-input">
         <input
           class="sr-only"
           type="file"
-          id="file"
-          x-on:change="file = $event.target.files[0]"
+          id="cache-input"
+          :disabled="!wasm_initialized"
+          @change="file = $event.target.files[0]"
         />
         <span 
           class="analyze-rating__button-text"
@@ -84,7 +82,7 @@
         >Loading...</span>
       </label>
       <template x-if="tsvRows.length > 0">
-          <div class="analyze-rating__button" x-on:click="exportToTsv(tsvRows)">
+          <div class="analyze-rating__button" @click="exportToTsv(tsvRows)">
               <span class="analyze-rating__button-text">Export to TSV</span>
           </div>
       </template>
@@ -147,14 +145,13 @@
 
   <hr class="separator" />
   <h2 class="title">Frequently Asked Questions</h2>
-  <ul>
+  <ul class="faq">
     <li>
       Q: <span class="faq__question">Will there be iOS support?</span><br />
       A:
       <span class="faq__answer">
         Unfortunately, no. AstroDX on iOS generates a unique
-        <code>cache</code> encryption<br />
-        key every installation.
+        <code>cache</code> encryption key every installation.
       </span>
     </li>
     <li>
