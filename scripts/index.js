@@ -223,6 +223,7 @@
   scope.analyzeRating = async function (region, version, file, $data) {
     if (lastFile !== file) {
       $data.best50 = [];
+      $data.tsvRows = [];
       $data.totalRating = 0;
       $data.status = "";
     }
