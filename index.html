@@ -83,18 +83,16 @@
           :disabled="!wasm_initialized"
           @change="file = $event.target.files[0]"
         />
-        <span 
+        <span
           class="analyze-rating__button-text"
           x-text="wasm_initialized ? 'Upload a file...' : 'Loading...'"
         >Loading...</span>
       </label>
-      <template x-if="tsvRows.length > 0">
-          <div class="analyze-rating__button" @click="exportToTsv(tsvRows)">
-              <span class="analyze-rating__button-text">Export to TSV</span>
-          </div>
-      </template>
+      <div x-cloak x-show="tsvRows.length > 0" class="analyze-rating__button" @click="exportToTsv(tsvRows)">
+        <span class="analyze-rating__button-text">Export to TSV</span>
+      </div>
     </div>
-    <p x-text="status"></p>
+    <p x-html="status"></p>
 
     <div x-cloak x-show="best50.length > 0">
       <hr class="separator" />

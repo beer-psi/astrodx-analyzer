@@ -214,11 +214,11 @@
    */
   let lastFile = null;
   /**
-   * 
-   * @param {"jp" | "intl"} region 
-   * @param {keyof typeof magicSauce} version 
-   * @param {File} file 
-   * @param {Record<string, Any>} $data 
+   *
+   * @param {"jp" | "intl"} region
+   * @param {keyof typeof magicSauce} version
+   * @param {File} file
+   * @param {Record<string, Any>} $data
    */
   scope.analyzeRating = async function (region, version, file, $data) {
     if (lastFile !== file) {
@@ -245,7 +245,8 @@
           break;
       }
     } catch (e) {
-      $data.status = "Failed to decrypt file. Are you on iOS?";
+      $data.status = `Failed to decrypt file. Are you on iOS?<br />
+      Detailed error: <code>${e.message}</code>`;
       return;
     }
 
@@ -268,7 +269,7 @@
       .split("\n")
       .map((line) => {
         const cells = line.split("\t");
-        
+
         const score = {
           title: cells[1],
           difficulty: cells[5],
@@ -368,7 +369,7 @@
         b.level - a.level ||
         b.achievement - a.achievement
     );
-    
+
     $data.tsvRows = annotatedRows;
     $data.best50 = allCharts.slice(0, 50);
     $data.totalRating = $data.best50.reduce(
