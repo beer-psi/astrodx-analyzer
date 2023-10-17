@@ -76,79 +76,100 @@
   //#endregion
 
   //#region Magic
+  const DIFFICULTIES = ["BASIC", "ADVANCED", "EXPERT", "MASTER", "Re:MASTER"];
+  
+  const DX_REGEX = /\bdx\s*:\s*([0-9]+)/;
+  const LV_REGEX = /\blv\s*:\s*(\[.+?\])/;
+  const VERSION_REGEX = /\bv\s*:\s*(-?[0-9]+)/;
+  const SONGNAME_REGEX = /\bn\s*:\s*["'`](.+?)["'`]\s*[,\}]/;
+  const SONGNICKNAME_REGEX = /\bnn\s*:\s*["'`](.+?)["'`]\s*[,\}]/;
+  const ICO_REGEX = /\bico\s*:\s*["`]([0-9a-z]+)["`]/;
+
+  
   const magicSauce = {
     universeplus:
       "https://gist.githubusercontent.com/myjian/ee569d74f422d4e255065d8b02ea294a/raw/932fb03a38121210080d6f537913a084247e531c/maidx_in_lv_universeplus.js",
     festival:
-      "https://sgimera.github.io/mai_RatingAnalyzer/scripts_maimai/maidx_in_lv_festival.js",
+      "https://gist.githubusercontent.com/myjian/0855c8947b547d7b9b888158512dde69/raw/1eeb074d39367748af40fb1a9dd4a16b42f99b6b/maidx_in_lv_festival.js",
     festivalplus:
-      "https://sgimera.github.io/mai_RatingAnalyzer/scripts_maimai/maidx_in_lv_festivalplus.js",
+      "https://gist.githubusercontent.com/myjian/ad2685872fd7f5cd7a47ecb340514e6b/raw/9961748d3c481ef495cfe3d080392ab86295ce9c/maidx_in_lv_festivalplus.js",
+    buddies:
+      "https://sgimera.github.io/mai_RatingAnalyzer/scripts_maimai/maidx_in_lv_buddies.js",
   };
 
+  function normalizeSongName(name) {
+    if (name === 'D✪N’T  ST✪P  R✪CKIN’') {
+      return 'D✪N’T ST✪P R✪CKIN’';
+    }
+    return name.replace(/" \+ '/g, '').replace(/' \+ "/g, '');
+  }
+
+  function parseLine(line) {
+    const dxMatch = line.match(DX_REGEX);
+    const lvMatch = line.match(LV_REGEX);
+    const debutVerMatch = line.match(VERSION_REGEX);
+    const songNameMatch = line.match(SONGNAME_REGEX);
+    const nicknameMatch = line.match(SONGNICKNAME_REGEX);
+    const icoMatch = line.match(ICO_REGEX);
+    if (dxMatch && lvMatch && debutVerMatch && songNameMatch) {
+      let lvList = JSON.parse(lvMatch[1]);
+      if (lvList.length > DIFFICULTIES.length) {
+        const newReMasterLv = lvList.pop();
+        lvList[DIFFICULTIES.length - 1] = newReMasterLv;
+      }
+      const props = {
+        dx: parseInt(dxMatch[1]),
+        lv: lvList,
+        v: Math.abs(parseInt(debutVerMatch[1])),
+        n: normalizeSongName(songNameMatch[1]),
+      };
+      if (nicknameMatch) {
+        props.nn = nicknameMatch[1];
+      }
+      if (icoMatch) {
+        props.ico = icoMatch[1];
+      }
+      return props;
+    }
+  }
+
   /**
-   *
    * @param {keyof typeof magicSauce} version
-   * @returns {Promise<[SgimeraChart[], Map<string, string>]>}
+   * @returns {Promise<SgimeraChart[]>}
    */
   async function fetchMagic(version) {
-    const sauce = magicSauce[version] || magicSauce["universeplus"];
-    const res = await fetch(sauce);
-    const patchesRes = await fetch("data/patches.json");
-    if (res.ok && patchesRes.ok) {
-      let script = await res.text();
-      script = script
-        .replace(/^javascript:/, "")
-        .replace(/^(var|let|const)\s+/gm, "this.");
-
-      const scope = { Map };
-      new Function(`with (this) { ${script} }`).call(scope);
-
-      /**
-       * @type {SgimeraChart[]}
-       */
-      const charts = scope.in_lv || scope.in_lv_old;
-      const patches = await patchesRes.json();
-      for (const [name, patch] of Object.entries(patches)) {
-        const chartIndex = charts.findIndex((chart) => chart.n === name);
-        if (chartIndex !== -1) {
-          charts[chartIndex] = { ...charts[chartIndex], ...patch };
-        } else {
-          charts.push(patch);
-        }
-      }
-
-      return [charts, scope.NameAlias || new Map()];
+    const res = await fetch(magicSauce[version] || magicSauce["universeplus"]);
+    if (res.ok) {
+      const text = await res.text();
+      return text
+          .split("\n")
+          .map(parseLine)
+          .filter((props) => props);
     }
-
-    return [[], new Map()];
+    return [];
   }
 
   /**
    *
    * @param {keyof typeof magicSauce} version
-   * @returns {Promise<[SgimeraChart[], Map<string, string>]>}
+   * @returns {Promise<SgimeraChart[]>}
    */
   async function loadMagic(version) {
-    const cachedMagicString = localStorage.getItem(`inlv${version}`);
+    const cachedMagicString = localStorage.getItem(`inlv${version}_1`);
     const cachedMagic = JSON.parse(cachedMagicString ?? "{}");
     if (cachedMagicString && new Date(cachedMagic.expiration) > new Date()) {
-      const data = cachedMagic.data;
-      data[1] = new Map(Object.entries(data[1]));
-      return data;
+      return cachedMagic.data;
     }
 
     const magic = await fetchMagic(version);
-    if (magic[0].length) {
+    if (magic.length) {
       window.localStorage.setItem(
-        `inlv${version}`,
+        `inlv${version}_1`,
         JSON.stringify(
           {
             expiration: new Date(Date.now() + 1000 * 60 * 60 * 24),
             data: magic,
-          },
-          (_, value) =>
-            value instanceof Map ? Object.fromEntries(value) : value
-        )
+          }
       );
     }
     return magic;
@@ -186,8 +207,6 @@
     );
   }
   //#endregion
-
-  const DIFFICULTIES = ["BASIC", "ADVANCED", "EXPERT", "MASTER", "Re:MASTER"];
   const ChartType = {
     UNKNOWN: -1,
     STANDARD_ONLY: 0,
@@ -256,7 +275,7 @@
     }
 
     $data.status = "Loading internal level data...";
-    const [magicCharts, aliases] = await loadMagic(version);
+    const magicCharts = await loadMagic(version);
 
     $data.status = "Processing scores...";
     // For CSV export
@@ -300,7 +319,7 @@
         }
 
         const title = normalizeTitle(
-          aliases.get(score.title) || score.title
+          score.title
         );
 
         let charts = magicCharts.filter(
