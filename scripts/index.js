@@ -94,7 +94,7 @@
     festivalplus:
       "https://gist.githubusercontent.com/myjian/ad2685872fd7f5cd7a47ecb340514e6b/raw/9961748d3c481ef495cfe3d080392ab86295ce9c/maidx_in_lv_festivalplus.js",
     buddies:
-      "https://admirable0531.github.io/astrodx-analyzer/data/buddies.js",
+      "https://admirable0531.github.io/buddiesMagic/buddiesMagic.js",
   };
 
   function normalizeSongName(name) {
