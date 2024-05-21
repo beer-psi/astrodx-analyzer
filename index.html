@@ -35,7 +35,7 @@
   </noscript>
 
   <div
-    x-data="{ region: 'intl', version: 'festivalplus', totalRating: 0, best50: [], tsvRows: [], file: null, wasm_initialized: false, status: '' }"
+    x-data="{ region: 'intl', version: 'buddiesplus', totalRating: 0, best50: [], tsvRows: [], file: null, wasm_initialized: false, status: '' }"
     x-effect="file && await analyzeRating(region, version, file, $data)"
     x-init="wasm_bindgen().then(_ => wasm_initialized = true);"
   >
